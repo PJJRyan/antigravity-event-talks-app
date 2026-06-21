@@ -696,7 +696,19 @@
       return Object.values(root.children);
     }    // Helper to generate a simple nested list representation of the EXPOSED directory tree from DOM
     function getVisibleHierarchyText(treeNodeEl, indent = 0) {
-      const row = treeNodeEl.querySelector(':scope > .tree-row');
+      let row = null;
+      let childrenContainer = null;
+      
+      // Strict immediate child lookup to avoid deep-nested querySelector matches
+      for (let i = 0; i < treeNodeEl.children.length; i++) {
+        const child = treeNodeEl.children[i];
+        if (child.classList.contains('tree-row')) {
+          row = child;
+        } else if (child.classList.contains('tree-children')) {
+          childrenContainer = child;
+        }
+      }
+      
       if (!row || row.classList.contains('hidden-node')) return '';
       
       const name = row.querySelector('.node-name').textContent;
@@ -706,13 +718,12 @@
       let result = `${spaces}${name}${type === 'directory' ? '/' : ''}\n`;
       
       // Only traverse children if this directory is NOT collapsed in the UI
-      if (type === 'directory' && !row.classList.contains('collapsed')) {
-        const childrenContainer = treeNodeEl.querySelector(':scope > .tree-children');
-        if (childrenContainer) {
-          const childNodes = childrenContainer.querySelectorAll(':scope > .tree-node');
-          childNodes.forEach(childNode => {
+      if (type === 'directory' && !row.classList.contains('collapsed') && childrenContainer) {
+        for (let i = 0; i < childrenContainer.children.length; i++) {
+          const childNode = childrenContainer.children[i];
+          if (childNode.classList.contains('tree-node')) {
             result += getVisibleHierarchyText(childNode, indent + 1);
-          });
+          }
         }
       }
       return result;
