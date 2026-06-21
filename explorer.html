@@ -694,6 +694,16 @@
       
       convertChildrenToArray(root);
       return Object.values(root.children);
+    }    // Helper to generate a simple nested list representation of a directory tree
+    function getDirectoryHierarchyText(node, indent = 0) {
+      const spaces = '  '.repeat(indent);
+      let result = `${spaces}${node.name}${node.type === 'directory' ? '/' : ''}\n`;
+      if (node.type === 'directory' && node.children) {
+        node.children.forEach(child => {
+          result += getDirectoryHierarchyText(child, indent + 1);
+        });
+      }
+      return result;
     }
 
     // 8. Tree Renderer
@@ -739,11 +749,12 @@
           `;
         }
         
+        const badgeText = node.type === 'directory' ? 'Copy Tree' : 'Copy Path';
         rowEl.innerHTML = `
           ${arrowHTML}
           ${iconHTML}
           <span class="node-name">${node.name}</span>
-          <span class="copy-badge">Copy Path</span>
+          <span class="copy-badge">${badgeText}</span>
         `;
         
         nodeEl.appendChild(rowEl);
@@ -772,20 +783,24 @@
             return;
           }
           
-          const relPath = rowEl.getAttribute('data-path');
-          
-          let finalPath = relPath;
-          if (copyMode === 'absolute') {
-            const prefix = prefixInput.value.replace(/\\/g, '/').replace(/\/$/, '');
-            finalPath = prefix ? `${prefix}/${relPath}` : relPath;
+          if (node.type === 'directory') {
+            const listText = getDirectoryHierarchyText(node, 0);
+            copyText(listText.trim(), `Copied directory tree structure!`);
+          } else {
+            const relPath = rowEl.getAttribute('data-path');
+            let finalPath = relPath;
+            if (copyMode === 'absolute') {
+              const prefix = prefixInput.value.replace(/\\/g, '/').replace(/\/$/, '');
+              finalPath = prefix ? `${prefix}/${relPath}` : relPath;
+            }
+            copyText(finalPath, `Copied ${copyMode} path!`);
           }
-          
-          copyText(finalPath, `Copied ${copyMode} path!`);
           triggerBadgeSuccess(rowEl.querySelector('.copy-badge'));
         });
         
         return nodeEl;
       }
+      
       
       tree.forEach(node => {
         const root = createNode(node);
