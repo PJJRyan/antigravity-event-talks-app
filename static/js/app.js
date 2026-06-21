@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // DOM Elements
   const refreshBtn = document.getElementById('refresh-btn');
+  const exportCsvBtn = document.getElementById('export-csv-btn');
   const cacheStatus = document.getElementById('cache-status');
   const searchInput = document.getElementById('search-input');
   const clearSearchBtn = document.getElementById('clear-search');
@@ -249,10 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. TIMELINE RENDERING
   
-  // Render timeline cards
-  function renderTimeline() {
-    // Filter updates
-    let filtered = parsedUpdates.filter(update => {
+  // Get currently filtered updates
+  function getFilteredUpdates() {
+    return parsedUpdates.filter(update => {
       // Category filter
       if (currentFilter !== 'all') {
         if (currentFilter === 'Issue') {
@@ -274,6 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
       
       return true;
     });
+  }
+
+  // Render timeline cards
+  function renderTimeline() {
+    // Filter updates
+    let filtered = getFilteredUpdates();
 
     if (filtered.length === 0) {
       timeline.innerHTML = '';
@@ -440,6 +446,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Helper to escape values for CSV format
+  function escapeCSV(text) {
+    if (text === null || text === undefined) return '';
+    return '"' + text.toString().replace(/"/g, '""') + '"';
+  }
+
+  // Exports currently filtered updates to a CSV file
+  function exportToCSV() {
+    const filtered = getFilteredUpdates();
+    if (filtered.length === 0) {
+      showToast("No updates to export", "error");
+      return;
+    }
+
+    const headers = ["Date", "Category", "Sub-Category", "Description", "Link"];
+    const csvRows = [headers.map(escapeCSV).join(",")];
+
+    filtered.forEach(u => {
+      const row = [
+        u.date,
+        u.category,
+        u.rawCategory,
+        u.textContent,
+        u.originalLink
+      ];
+      csvRows.push(row.map(escapeCSV).join(","));
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bigquery_release_notes_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast(`Successfully exported ${filtered.length} updates to CSV!`);
+  }
+
   // 4. SHARING & TWITTER LOGIC
   
   // Helper to copy text to clipboard
@@ -562,6 +610,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Refresh button click
   refreshBtn.addEventListener('click', () => loadFeed(true));
+
+  // Export CSV button click
+  exportCsvBtn.addEventListener('click', exportToCSV);
 
   // Search input typing
   searchInput.addEventListener('input', () => {
