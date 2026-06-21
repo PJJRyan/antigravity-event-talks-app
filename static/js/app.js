@@ -378,6 +378,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Click handler helpers
+  function showCopySuccessState(btn) {
+    const originalSVG = btn.innerHTML;
+    // Set to green checkmark
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    btn.disabled = true;
+
+    setTimeout(() => {
+      btn.innerHTML = originalSVG;
+      btn.disabled = false;
+    }, 1500);
+  }
+
   function attachCardListeners() {
     // Card item selection
     document.querySelectorAll('.update-card').forEach(card => {
@@ -412,6 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const update = parsedUpdates.find(u => u.id === id);
         if (update) {
           copyUpdateToClipboard(update);
+          showCopySuccessState(btn);
         }
       });
     });
