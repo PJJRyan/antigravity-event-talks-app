@@ -751,6 +751,7 @@
         let iconHTML = '';
         
         if (node.type === 'directory') {
+          rowEl.classList.add('collapsed');
           arrowHTML = `
             <div class="folder-arrow">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
