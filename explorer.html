@@ -694,14 +694,26 @@
       
       convertChildrenToArray(root);
       return Object.values(root.children);
-    }    // Helper to generate a simple nested list representation of a directory tree
-    function getDirectoryHierarchyText(node, indent = 0) {
+    }    // Helper to generate a simple nested list representation of the EXPOSED directory tree from DOM
+    function getVisibleHierarchyText(treeNodeEl, indent = 0) {
+      const row = treeNodeEl.querySelector(':scope > .tree-row');
+      if (!row || row.classList.contains('hidden-node')) return '';
+      
+      const name = row.querySelector('.node-name').textContent;
+      const type = row.getAttribute('data-type');
       const spaces = '  '.repeat(indent);
-      let result = `${spaces}${node.name}${node.type === 'directory' ? '/' : ''}\n`;
-      if (node.type === 'directory' && node.children) {
-        node.children.forEach(child => {
-          result += getDirectoryHierarchyText(child, indent + 1);
-        });
+      
+      let result = `${spaces}${name}${type === 'directory' ? '/' : ''}\n`;
+      
+      // Only traverse children if this directory is NOT collapsed in the UI
+      if (type === 'directory' && !row.classList.contains('collapsed')) {
+        const childrenContainer = treeNodeEl.querySelector(':scope > .tree-children');
+        if (childrenContainer) {
+          const childNodes = childrenContainer.querySelectorAll(':scope > .tree-node');
+          childNodes.forEach(childNode => {
+            result += getVisibleHierarchyText(childNode, indent + 1);
+          });
+        }
       }
       return result;
     }
@@ -784,8 +796,8 @@
           }
           
           if (node.type === 'directory') {
-            const listText = getDirectoryHierarchyText(node, 0);
-            copyText(listText.trim(), `Copied directory tree structure!`);
+            const listText = getVisibleHierarchyText(nodeEl, 0);
+            copyText(listText.trim(), `Copied exposed directory tree structure!`);
           } else {
             const relPath = rowEl.getAttribute('data-path');
             let finalPath = relPath;
