@@ -95,6 +95,57 @@ def get_releases():
             "message": str(e)
         }), 500
 
+@app.route('/api/files')
+def get_files():
+    """
+    Returns a tree structure of the workspace files and directories.
+    Ignores virtual environments, caches, and hidden files for clean navigation.
+    """
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    ignore_dirs = {'.git', 'venv', '.venv', 'env', '__pycache__', '.idea', '.vscode'}
+    
+    def walk_dir(path):
+        tree = []
+        try:
+            for entry in os.scandir(path):
+                if entry.name.startswith('.') or entry.name in ignore_dirs:
+                    continue
+                    
+                rel_path = os.path.relpath(entry.path, root_dir).replace('\\', '/')
+                
+                if entry.is_dir():
+                    tree.append({
+                        "name": entry.name,
+                        "path": rel_path,
+                        "type": "directory",
+                        "children": walk_dir(entry.path)
+                    })
+                else:
+                    tree.append({
+                        "name": entry.name,
+                        "path": rel_path,
+                        "type": "file"
+                    })
+        except Exception as e:
+            pass
+        
+        # Sort directories first, then files alphabetically
+        tree.sort(key=lambda x: (x['type'] != 'directory', x['name'].lower()))
+        return tree
+
+    try:
+        file_tree = walk_dir(root_dir)
+        return jsonify({
+            "status": "success",
+            "data": file_tree
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
 if __name__ == '__main__':
     # Listen on localhost:5000 by default
     app.run(host='127.0.0.1', port=5000, debug=True)
