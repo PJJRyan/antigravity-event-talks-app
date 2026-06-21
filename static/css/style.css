@@ -1147,3 +1147,79 @@ body {
     opacity: 1;
   }
 }
+
+/* ==========================================
+   Light Mode & Theme Toggle System
+   ========================================== */
+
+:root.light-mode {
+  --bg-primary: #f8fafc;       /* Light slate background */
+  --bg-secondary: #ffffff;     /* White card background */
+  --bg-tertiary: #f1f5f9;      /* Light grey fields & hover */
+  --border-color: #cbd5e1;     /* Slate border */
+  
+  /* Accent Colors adapted for light mode readability */
+  --accent-cyan: #0891b2;
+  --accent-cyan-hover: #0369a1;
+  --accent-purple: #7c3aed;
+  --accent-purple-glow: rgba(124, 58, 237, 0.15);
+  --accent-blue: #2563eb;
+  --accent-green: #059669;
+  --accent-red: #dc2626;
+  --accent-orange: #ea580c;
+  
+  /* Text Colors */
+  --text-primary: #0f172a;     /* Dark slate text */
+  --text-secondary: #334155;   /* Muted slate text */
+  --text-muted: #64748b;       /* Lighter grey metadata text */
+  
+  /* Shadows - adapted for light theme depth */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 20px 0px rgba(8, 145, 178, 0.08);
+  --shadow-glow-purple: 0 0 20px 0px rgba(124, 58, 237, 0.08);
+}
+
+/* Light mode overrides for specific elements */
+:root.light-mode body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+:root.light-mode .logo-icon {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:root.light-mode .btn-tweet {
+  background: #0f1419;
+  color: #ffffff;
+  border-color: #0f1419;
+}
+
+:root.light-mode .btn-tweet:hover {
+  background-color: #272c30;
+}
+
+:root.light-mode .progress-ring-circle-bg {
+  stroke: #e2e8f0;
+}
+
+:root.light-mode .tweet-preview-card {
+  background-color: #f8fafc;
+}
+
+/* Theme Toggle Button Style */
+#theme-toggle-btn {
+  padding: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  aspect-ratio: 1 / 1;
+}
+
+.theme-icon.hidden {
+  display: none !important;
+}
+
